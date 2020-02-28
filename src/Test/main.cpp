@@ -156,8 +156,8 @@ BOOST_AUTO_TEST_CASE(DBCParsing)
                       << ", factor " << signal.second->getFactor()
                       << ", offset " << signal.second->getOffset()
                       << ", min " << signal.second->getMinimum()
-                      << ", max " << signal.second->getMaximum()
-                      << ", comment" << signal.second->getComment()
+                      << ", max " << std::to_string(signal.second->getMaximum())
+                      << ", comment " << signal.second->getComment()
                       << std::endl;
 
             std::cout << "Attributes values" ;

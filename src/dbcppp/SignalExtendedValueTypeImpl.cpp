@@ -16,3 +16,8 @@ uint64_t SignalExtendedValueTypeImpl::getValue() const
 {
     return _value;
 }
+
+SignalExtendedValueType::ValueType SignalExtendedValueTypeImpl::getValueType() const
+{
+    return _value_type;
+}

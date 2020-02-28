@@ -1020,7 +1020,7 @@ DBCPPP_API bool operator>>(std::istream& is, Network& net)
 	std::string str((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
 	auto begin{str.begin()}, end{str.end()};
 	NetworkGrammar<std::string::iterator> g;
-	result = phrase_parse(begin, end, g, ascii::space, static_cast<NetworkImpl&>(net));
+	result = phrase_parse(begin, end, g, ascii::space, dynamic_cast<NetworkImpl&>(net));
 	if (begin != end)
 	{
 		std::cout << std::string(begin, end) << std::endl;
