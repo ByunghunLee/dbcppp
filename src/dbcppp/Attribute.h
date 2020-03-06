@@ -13,14 +13,7 @@ namespace dbcppp
 	class DBCPPP_API Attribute
 	{
 	public:
-		struct IntegerValue { int64_t value; };
-		struct HexValue { int64_t value; };
-		struct FloatValue { double value; };
-		struct EnumValue { int64_t value; };
-		struct StringValue { std::string value; };
-
-		using hex_value_t = int64_t;
-		using value_t = boost::variant<IntegerValue, HexValue, FloatValue, EnumValue, StringValue>;
+	    using value_t = boost::variant<int64_t, double, std::string>;
 
 		virtual ~Attribute() = default;
 		virtual const std::string& getName() const = 0;

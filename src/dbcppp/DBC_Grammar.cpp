@@ -21,6 +21,7 @@
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/fusion/adapted.hpp>
 #include <boost/spirit/include/qi_hold.hpp>
+#include <boost/spirit/include/qi_real.hpp>
 
 #include "DBC_Grammar.h"
 #include "Network.h"
@@ -32,7 +33,6 @@
 #include "AttributeDefinitionImpl.h"
 #include "EnvironmentVariableImpl.h"
 #include "MessageImpl.h"
-#include "SignalExtendedValueTypeImpl.h"
 
 using namespace dbcppp;
 
@@ -42,6 +42,7 @@ namespace sp = boost::spirit::labels;
 namespace ph = boost::phoenix;
 namespace fu = boost::fusion;
 
+
 BOOST_FUSION_ADAPT_STRUCT(
 	NetworkImpl,
 	_version,
@@ -50,10 +51,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 	_nodes,
 	_value_tables,
 	_signal_types,
-	_attribute_definitions,
-	//attributeValues,
+	_attribute_definitions
+	//_attribute_values
 	//attributeRelationValues
-	_signal_extended_value_types
 )
 BOOST_FUSION_ADAPT_STRUCT(
 	NodeImpl,
@@ -271,7 +271,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 	AttributeDefinition::ValueTypeEnum,
 	values
 )
-using attr_value_t = boost::variant<uint64_t, int64_t, double, std::string>;
+
+using attr_value_t = boost::variant<int64_t, double, std::string>;
+
 struct G_Attribute
 {
 	std::string name;
@@ -342,13 +344,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 	attribute_name,
 	env_var_name,
 	value
-)
-
-BOOST_FUSION_ADAPT_STRUCT(
-    SignalExtendedValueTypeImpl,
-    _message_id,
-    _signal_name,
-    _value
 )
 
 auto set_bit_timing =
@@ -620,18 +615,19 @@ auto insert_attribute_defaults_into_network =
 		NetworkImpl& net = context.attributes.car;
 		for (const auto& g_attr : g_attrs)
 		{
-			AttributeDefinitionImpl& attr_def = net._attribute_definitions[g_attr.name];
+			//AttributeDefinitionImpl& attr_def = net._attribute_definitions[g_attr.name];
 			AttributeImpl& attr = net._attribute_defaults[g_attr.name];
 			attr._name = g_attr.name;
-			attr._object_type = attr_def._object_type;
-			switch (attr_def._value_type.which())
-			{
-			case 0: attr._value = Attribute::IntegerValue { boost::get<int64_t>     (g_attr.value) }; break;
-			case 1: attr._value = Attribute::HexValue     { boost::get<int64_t>     (g_attr.value) }; break;
-			case 2: attr._value = Attribute::FloatValue   { boost::get<double>      (g_attr.value) }; break;
-			case 3: attr._value = Attribute::StringValue  { boost::get<std::string> (g_attr.value) }; break;
-			case 4: attr._value = Attribute::StringValue  { boost::get<std::string> (g_attr.value) }; break;
-			}
+            std::cout << "Default:: " << g_attr.name << " " << g_attr.value.which() << std::endl;
+			//attr._object_type = attr_def._object_type;
+//			switch (attr_def._value_type.which())
+//			{
+//			case 0: attr._value = Attribute::IntegerValue { boost::get<int64_t>     (g_attr.value) }; break;
+//			case 1: attr._value = Attribute::HexValue     { boost::get<int64_t>     (g_attr.value) }; break;
+//			case 2: attr._value = Attribute::FloatValue   { boost::get<double>      (g_attr.value) }; break;
+//			case 3: attr._value = Attribute::StringValue  { boost::get<std::string> (g_attr.value) }; break;
+//			case 4: attr._value = Attribute::StringValue  { boost::get<std::string> (g_attr.value) }; break;
+//			}
 		}
 	};
 auto insert_attribute_values_into_network =
@@ -645,17 +641,18 @@ auto insert_attribute_values_into_network =
 			{}
 			void assign(const std::string& attr_name, const attr_value_t& value, AttributeImpl& attr)
 			{
-				AttributeDefinitionImpl& attr_def = _net._attribute_definitions[attr_name];
+				//AttributeDefinitionImpl& attr_def = _net._attribute_definitions[attr_name];
 				attr._name = attr_name;
+				std::cout << "Value:: " << attr_name << " " << value.which() << std::endl;
 				attr._object_type = AttributeDefinition::ObjectType::Network;
-				switch (attr_def._value_type.which())
-				{
-					case 0: attr._value = Attribute::IntegerValue { boost::get<int64_t>     (value) }; break;
-					case 1: attr._value = Attribute::HexValue     { boost::get<int64_t>     (value) }; break;
-					case 2: attr._value = Attribute::FloatValue   { boost::get<double>      (value) }; break;
-					case 3: attr._value = Attribute::StringValue  { boost::get<std::string> (value) }; break;
-					case 4: attr._value = Attribute::EnumValue    { boost::get<int64_t>     (value) }; break;
-				}
+//				switch (attr_def._value_type.which())
+//				{
+//					case 0: attr._value = Attribute::IntegerValue { boost::get<int64_t>     (value) }; break;
+//					case 1: attr._value = Attribute::HexValue     { boost::get<int64_t>     (value) }; break;
+//					case 2: attr._value = Attribute::FloatValue   { boost::get<double>      (value) }; break;
+//					case 3: attr._value = Attribute::StringValue  { boost::get<std::string> (value) }; break;
+//					case 4: attr._value = Attribute::EnumValue    { boost::get<int64_t>     (value) }; break;
+//				}
 			}
 			void operator()(const G_AttributeNetwork& g_attr)
 			{
@@ -722,7 +719,7 @@ struct NetworkGrammar
 	NetworkGrammar()
 		: NetworkGrammar::base_type(_DBC_file)
 	{
-		_DBC_file %= 
+		_DBC_file %=
 			   _version
 			>> _new_symbols
 			>> _bit_timing
@@ -737,8 +734,9 @@ struct NetworkGrammar
 			>> _attribute_definitions
 			>> qi::omit[_attribute_defaults[insert_attribute_defaults_into_network]]
 			>> qi::omit[_attribute_values[insert_attribute_values_into_network]]
-			>> qi::omit[_value_descriptions[insert_value_descriptions_into_network]]
-			>> _signal_extended_value_types;
+
+			>> qi::omit[_value_descriptions[insert_value_descriptions_into_network]];
+			;
 
 		_unsigned_integer %= qi::uint_;
 		_signed_integer %= qi::int_;
@@ -782,12 +780,12 @@ struct NetworkGrammar
 			];
 		_new_symbols %= qi::lit("NS_") >> ':' >> *_new_symbol;
 		_new_symbol_values %= -*_C_identifier;
-		
+
 		_bit_timing = qi::lit("BS_") >> ':' >> qi::omit[(-(_baudrate >> ':' >> _BTR1 >> ',' >> _BTR2))[set_bit_timing]];
 		_baudrate %= _unsigned_integer;
 		_BTR1 %= _unsigned_integer;
 		_BTR2 %= _unsigned_integer;
-		
+
 		_nodes %= qi::lit("BU_") >> ':' >> qi::skip(ascii::blank)[*_node_ >> qi::eol];
 		_node_ = _node_name_[node_to_pair];
 		_node_name = _C_identifier[set_node_name];
@@ -849,7 +847,7 @@ struct NetworkGrammar
 			>> _minimum >> '|' >> _maximum >> ']' >> _unit >> _default_value >> ',' >> _value_table_name >> ';';
 		_signal_type_name %= _C_identifier;
 		_default_value %= _double;
-		
+
 		_comments %= *_comment;
 		_comment %= qi::lit("CM_") >> (_comment_node | _comment_message | _comment_signal | _comment_env_var | _comment_network);
 		_comment_network %= _char_string >> ';';
@@ -865,12 +863,14 @@ struct NetworkGrammar
 		_attribute_name %= _char_string;
 		_attribute_value_type %= _attribute_value_type_int | _attribute_value_type_hex | _attribute_value_type_float
 			| _attribute_value_type_string | _attribute_value_type_enum;
+
 		_attribute_value_type_int %= qi::lit("INT") >> _signed_integer >> _signed_integer;
 		_attribute_value_type_hex %= qi::lit("HEX") >> _signed_integer >> _signed_integer;
 		_attribute_value_type_float %= qi::lit("FLOAT") >> _double >> _double;
 		auto drain = [](const auto& p1, auto p2) {};
 		_attribute_value_type_string = qi::lit("STRING")[drain];
 		_attribute_value_type_enum %= qi::lit("ENUM") >> (_char_string % ',');
+
 
 		_attribute_defaults %= *_attribute_default;
 		_attribute_default %= (qi::lit("BA_DEF_DEF_REL_") | qi::lit("BA_DEF_DEF_"))
@@ -883,29 +883,26 @@ struct NetworkGrammar
 			  | _attribute_value_ent_message | _attribute_value_ent_signal
 			  | _attribute_value_ent_env_var) >> ';';
 		_attribute_value_ent_network %= _attribute_name >> _attribute_value;
-		_attribute_value_ent_node %= _attribute_name >> qi::lit("BU_") >> _node_name >> _attribute_value;
-		_attribute_value_ent_message %= _attribute_name >> qi::lit("BO_") >> _message_id >> _attribute_value;
-		_attribute_value_ent_signal %= _attribute_name >> qi::lit("SG_") >> _message_id >> _signal_name >> _attribute_value;
-		_attribute_value_ent_env_var %= _attribute_name >> qi::lit("EV_") >> _env_var_name >> _attribute_value;
+		_attribute_value_ent_node %= _attribute_name >> qi::lit("BU_") >> _node_name >> (  _double | _char_string );
+		_attribute_value_ent_message %= _attribute_name >> qi::lit("BO_") >> _message_id >> (  _double | _char_string );
+		_attribute_value_ent_signal %= _attribute_name >> qi::lit("SG_") >> _message_id >> _signal_name >> (  _double | _char_string );
+		_attribute_value_ent_env_var %= _attribute_name >> qi::lit("EV_") >> _env_var_name >> (  _double | _char_string );
 
 		_value_descriptions %= *_value_description_sig_env_var;
 		_value_description_sig_env_var %= _value_description_signal | _value_description_env_var;
 		_value_description_signal %= qi::lit("VAL_") >> _message_id >> _signal_name >> _value_encoding_descriptions >> ';';
 		_value_description_env_var %= qi::lit("VAL_") >> _env_var_name >> _value_encoding_descriptions >> ';';
-
-		_signal_extended_value_types %= *_signal_extended_value_type;
-		_signal_extended_value_type %= qi::lit("SIG_VALTYPE_") >> _message_id >> _signal_name >> ':' >>  _unsigned_integer >> ';';
 	}
 
 	qi::rule<Iter, NetworkImpl(), Skipper> _DBC_file;
-	
+
 	qi::rule<Iter, uint64_t(), Skipper> _unsigned_integer;
 	qi::rule<Iter, int64_t(), Skipper> _signed_integer;
-	qi::rule<Iter, double(), Skipper> _double;
+	qi::rule<Iter, double, Skipper> _double;
 	qi::rule<Iter, std::string(), Skipper> _char_string;
 	qi::rule<Iter, std::string(), Skipper> _C_identifier;
 	qi::rule<Iter, std::string(), ascii::blank_type> _C_identifier_;
-	
+
 	qi::rule<Iter, std::string(), Skipper> _version;
 	qi::rule<Iter, std::string(), Skipper> _new_symbol;
 	qi::rule<Iter, std::vector<std::string>(), Skipper> _new_symbols;
@@ -933,7 +930,7 @@ struct NetworkGrammar
 	qi::rule<Iter, std::string(), Skipper> _message_name;
 	qi::rule<Iter, uint64_t(), Skipper> _message_size;
 	qi::rule<Iter, std::string(), Skipper> _transmitter;
-	
+
 	qi::rule<Iter, std::vector<G_Signal>(), Skipper> _signals;
 	qi::rule<Iter, G_Signal(), Skipper> _signal;
 	qi::rule<Iter, std::string(), Skipper> _signal_name;
@@ -962,11 +959,11 @@ struct NetworkGrammar
 	qi::rule<Iter, uint64_t(), Skipper> _ev_id;
 	qi::rule<Iter, EnvironmentVariable::AccessType(), Skipper> _access_type;
 	qi::rule<Iter, std::vector<std::string>(), Skipper> _access_nodes;
-	
+
 	qi::rule<Iter, std::vector<G_EnvironmentVariableData>(), Skipper> _environment_variable_datas;
 	qi::rule<Iter, G_EnvironmentVariableData(), Skipper> _environment_variable_data;
 	qi::rule<Iter, uint64_t(), Skipper> _data_size;
-	
+
 	qi::rule<Iter, std::map<std::string, SignalTypeImpl>(), Skipper> _signal_types;
 	qi::rule<Iter, std::pair<std::string, SignalTypeImpl>(), Skipper> _signal_type_inter;
 	qi::rule<Iter, SignalTypeImpl(), Skipper> _signal_type;
@@ -995,7 +992,7 @@ struct NetworkGrammar
 
 	qi::rule<Iter, std::vector<G_Attribute>(), Skipper> _attribute_defaults;
 	qi::rule<Iter, G_Attribute(), Skipper> _attribute_default;
-	qi::rule<Iter, boost::variant<int64_t, double, std::string>(), Skipper> _attribute_value;
+	qi::rule<Iter, attr_value_t(), Skipper> _attribute_value;
 
 	qi::rule<Iter, std::vector<variant_attribute_t>(), Skipper> _attribute_values;
 	qi::rule<Iter, variant_attribute_t(), Skipper> _attribute_value_ent;
@@ -1009,9 +1006,6 @@ struct NetworkGrammar
 	qi::rule<Iter, boost::variant<G_ValueDescriptionSignal, G_ValueDescriptionEnvVar>(), Skipper> _value_description_sig_env_var;
 	qi::rule<Iter, G_ValueDescriptionSignal(), Skipper> _value_description_signal;
 	qi::rule<Iter, G_ValueDescriptionEnvVar(), Skipper> _value_description_env_var;
-
-	qi::rule<Iter, std::vector<SignalExtendedValueTypeImpl>(), Skipper> _signal_extended_value_types;
-	qi::rule<Iter, SignalExtendedValueTypeImpl(), Skipper> _signal_extended_value_type;
 };
 
 DBCPPP_API bool operator>>(std::istream& is, Network& net)
@@ -1020,7 +1014,7 @@ DBCPPP_API bool operator>>(std::istream& is, Network& net)
 	std::string str((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
 	auto begin{str.begin()}, end{str.end()};
 	NetworkGrammar<std::string::iterator> g;
-	result = phrase_parse(begin, end, g, ascii::space, dynamic_cast<NetworkImpl&>(net));
+	result = phrase_parse(begin, end, g, ascii::space, static_cast<NetworkImpl&>(net));
 	if (begin != end)
 	{
 		std::cout << std::string(begin, end) << std::endl;

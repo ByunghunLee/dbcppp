@@ -160,9 +160,9 @@ BOOST_AUTO_TEST_CASE(DBCParsing)
                       << ", comment " << signal.second->getComment()
                       << std::endl;
 
-            std::cout << "Attributes values" ;
+            std::cout << "Attributes values\n" ;
             for (auto& element : signal.second->getAttributeValues()) {
-                std::cout << element.first << std::endl;
+                std::cout << element.first << " " << element.second->getValue().which() << " " << element.second->getValue().type().name() <<  std::endl;
             }
         }
     }
