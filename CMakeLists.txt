@@ -19,6 +19,8 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 include_directories(D:/boost_1_69_0)
 link_directories(D:/boost_1_69_0/stage/lib)
 
+include_directories("third_party")
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
 	add_definitions("/bigobj")
 endif()
