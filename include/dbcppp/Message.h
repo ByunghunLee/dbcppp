@@ -16,14 +16,16 @@ namespace dbcppp
 	{
 	public:
 		static std::unique_ptr<Message> create(
-			  uint64_t id
-			, std::string&& name
-			, uint64_t message_size
-			, std::string&& transmitter
-			, std::set<std::string>&& message_transmitters
-			, std::map<std::string, std::unique_ptr<Signal>>&& signals
-			, std::map<std::string, std::unique_ptr<Attribute>>&& attribute_values
-			, std::string&& comment);
+				uint64_t id
+				, std::string&& name
+				, uint64_t message_size
+				, std::string&& transmitter
+				, std::set<std::string>&& message_transmitters
+				, std::map<std::string, std::unique_ptr<Signal>>&& signals
+				, std::map<std::string, std::unique_ptr<Attribute>>&& attribute_values
+				, std::string&& comment);
+
+		virtual std::unique_ptr<Message> clone() const = 0;
 
 		virtual ~Message() = default;
 		virtual uint64_t getId() const = 0;
@@ -35,12 +37,12 @@ namespace dbcppp
 		virtual const Signal* getSignalByName(const std::string& name) const = 0;
 		virtual const Signal* findSignal(std::function<bool(const Signal&)>&& pred) const = 0;
 		virtual void forEachSignal(std::function<void(const Signal&)>&& cb) const = 0;
-        virtual void forEachSignalbyStartBit(std::function<void(const Signal &)>&& cb) const = 0;
+		virtual void forEachSignalOrderedByStartBit(std::function<void(const Signal&)>&& cb) const = 0;
 		virtual const Attribute* getAttributeValueByName(const std::string& name) const = 0;
 		virtual const Attribute* findAttributeValue(std::function<bool(const Attribute&)>&& pred) const = 0;
 		virtual void forEachAttributeValue(std::function<void(const Attribute&)>&& cb) const = 0;
 		virtual const std::string& getComment() const = 0;
-		
+
 		void serializeToStream(std::ostream& os) const;
 	};
 }
