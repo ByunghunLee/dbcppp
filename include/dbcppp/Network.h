@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <map>
@@ -75,7 +74,5 @@ namespace dbcppp
         virtual const Message* findParentMessage(const Signal* sig) const = 0;
 
         void merge(std::unique_ptr<Network>&& other);
-        
-        void serializeToStream(std::ostream& os) const;
     };
 }

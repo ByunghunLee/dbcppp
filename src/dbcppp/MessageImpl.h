@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "../../include/dbcppp/Message.h"
@@ -9,19 +8,23 @@
 namespace dbcppp
 {
     class MessageImpl final
-            : public Message
+        : public Message
     {
     public:
         MessageImpl(
-                uint64_t id
-                , std::string&& name
-                , uint64_t message_size
-                , std::string&& transmitter
-                , std::set<std::string>&& message_transmitters
-                , std::map<std::string, SignalImpl>&& signals
-                , std::map<std::string, AttributeImpl>&& attribute_values
-                , std::string&& comment);
-
+              uint64_t id
+            , std::string&& name
+            , uint64_t message_size
+            , std::string&& transmitter
+            , std::set<std::string>&& message_transmitters
+            , std::map<std::string, SignalImpl>&& signals
+            , std::map<std::string, AttributeImpl>&& attribute_values
+            , std::string&& comment);
+        MessageImpl(const MessageImpl& other);
+        MessageImpl(MessageImpl&& other) = default;
+        MessageImpl& operator=(const MessageImpl& other);
+        MessageImpl& operator=(MessageImpl&&) = default;
+            
         virtual std::unique_ptr<Message> clone() const override;
 
         virtual uint64_t getId() const override;
@@ -38,9 +41,12 @@ namespace dbcppp
         virtual const Attribute* findAttributeValue(std::function<bool(const Attribute&)>&& pred) const override;
         virtual void forEachAttributeValue(std::function<void(const Attribute&)>&& cb) const override;
         virtual const std::string& getComment() const override;
-
+        virtual const Signal* getMuxSignal() const override;
+        
+        virtual ErrorCode getError() const override;
+        
         const std::map<std::string, SignalImpl>& signals() const;
-
+        
     private:
         uint64_t _id;
         std::string _name;
@@ -51,5 +57,9 @@ namespace dbcppp
         std::map<uint64_t, SignalImpl> _signals_ordered_by_start_bit;
         std::map<std::string, AttributeImpl> _attribute_values;
         std::string _comment;
+
+        const Signal* _mux_signal;
+
+        ErrorCode _error;
     };
 }

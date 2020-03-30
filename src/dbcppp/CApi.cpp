@@ -1,4 +1,3 @@
-
 #include "../../include/dbcppp/CApi.h"
 #include "NetworkImpl.h"
 #include "EnvironmentVariableImpl.h"
@@ -1166,6 +1165,16 @@ extern "C"
     {
         auto sigi = reinterpret_cast<const SignalImpl*>(sig);
         sigi->encode(raw, buffer);
+    }
+    DBCPPP_API uint64_t dbcppp_SignalDecodeDiscrete(const dbcppp_Signal* sig, const void* bytes)
+    {
+        auto sigi = reinterpret_cast<const SignalImpl*>(sig);
+        return sigi->decodeDiscrete(bytes);
+    }
+    DBCPPP_API void dbcppp_SignalEncodeDiscrete(const dbcppp_Signal* sig, uint64_t raw, void* buffer)
+    {
+        auto sigi = reinterpret_cast<const SignalImpl*>(sig);
+        sigi->encodeDiscrete(raw, buffer);
     }
     DBCPPP_API double dbcppp_SignalRawToPhys(const dbcppp_Signal* sig, double raw)
     {

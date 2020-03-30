@@ -1,4 +1,3 @@
-
 #include <boost/move/unique_ptr.hpp>
 #include "MessageImpl.h"
 
@@ -6,14 +5,14 @@ using namespace dbcppp;
 
 
 std::unique_ptr<Message> Message::create(
-        uint64_t id
-        , std::string&& name
-        , uint64_t message_size
-        , std::string&& transmitter
-        , std::set<std::string>&& message_transmitters
-        , std::map<std::string, std::unique_ptr<Signal>>&& signals
-        , std::map<std::string, std::unique_ptr<Attribute>>&& attribute_values
-        , std::string&& comment)
+      uint64_t id
+    , std::string&& name
+    , uint64_t message_size
+    , std::string&& transmitter
+    , std::set<std::string>&& message_transmitters
+    , std::map<std::string, std::unique_ptr<Signal>>&& signals
+    , std::map<std::string, std::unique_ptr<Attribute>>&& attribute_values
+    , std::string&& comment)
 {
     std::map<std::string, SignalImpl> ss;
     std::map<std::string, AttributeImpl> avs;
@@ -28,38 +27,102 @@ std::unique_ptr<Message> Message::create(
         av.second.reset(nullptr);
     }
     return std::make_unique<MessageImpl>(
-            id
-            , std::move(name)
-            , message_size
-            , std::move(transmitter)
-            , std::move(message_transmitters)
-            , std::move(ss)
-            , std::move(avs)
-            , std::move(comment));
+          id
+        , std::move(name)
+        , message_size
+        , std::move(transmitter)
+        , std::move(message_transmitters)
+        , std::move(ss)
+        , std::move(avs)
+        , std::move(comment));
 }
 MessageImpl::MessageImpl(
-        uint64_t id
-        , std::string&& name
-        , uint64_t message_size
-        , std::string&& transmitter
-        , std::set<std::string>&& message_transmitters
-        , std::map<std::string, SignalImpl>&& signals
-        , std::map<std::string, AttributeImpl>&& attribute_values
-        , std::string&& comment)
-
-        : _id(std::move(id))
-        , _name(std::move(name))
-        , _message_size(std::move(message_size))
-        , _transmitter(std::move(transmitter))
-        , _message_transmitters(std::move(message_transmitters))
-        , _signals(std::move(signals))
-        , _attribute_values(std::move(attribute_values))
-        , _comment(std::move(comment))
+      uint64_t id
+    , std::string&& name
+    , uint64_t message_size
+    , std::string&& transmitter
+    , std::set<std::string>&& message_transmitters
+    , std::map<std::string, SignalImpl>&& signals
+    , std::map<std::string, AttributeImpl>&& attribute_values
+    , std::string&& comment)
+    
+    : _id(std::move(id))
+    , _name(std::move(name))
+    , _message_size(std::move(message_size))
+    , _transmitter(std::move(transmitter))
+    , _message_transmitters(std::move(message_transmitters))
+    , _signals(std::move(signals))
+    , _attribute_values(std::move(attribute_values))
+    , _comment(std::move(comment))
+    , _mux_signal(nullptr)
+    , _error(ErrorCode::NoError)
 {
     for (auto& s : _signals)
     {
         _signals_ordered_by_start_bit.insert(std::make_pair(s.second.getStartBit(), std::move(static_cast<SignalImpl&>(*s.second.clone()))));
     }
+    bool have_mux_value = false;
+    for (const auto& sig : _signals)
+    {
+        switch (sig.second.getMultiplexerIndicator())
+        {
+        case Signal::Multiplexer::MuxValue:
+            have_mux_value = true;
+            break;
+        case Signal::Multiplexer::MuxSwitch:
+            _mux_signal = &sig.second;
+            break;
+        }
+    }
+    if (have_mux_value && _mux_signal == nullptr)
+    {
+        _error = ErrorCode::MuxValeWithoutMuxSignal;
+    }
+}
+MessageImpl::MessageImpl(const MessageImpl& other)
+{
+    _id = other._id;
+    _name = other._name;
+    _message_size = other._message_size;
+    _transmitter = other._transmitter;
+    _message_transmitters = other._message_transmitters;
+    _signals = other._signals;
+    _attribute_values = other._attribute_values;
+    _comment = other._comment;
+    _mux_signal = nullptr;
+    for (const auto& sig : _signals)
+    {
+        switch (sig.second.getMultiplexerIndicator())
+        {
+        case Signal::Multiplexer::MuxSwitch:
+            _mux_signal = &sig.second;
+            break;
+        }
+    }
+    _error = other._error;
+}
+MessageImpl& MessageImpl::operator=(const MessageImpl& other)
+{
+    _id = other._id;
+    _name = other._name;
+    _message_size = other._message_size;
+    _transmitter = other._transmitter;
+    _message_transmitters = other._message_transmitters;
+    _signals = other._signals;
+    _attribute_values = other._attribute_values;
+    _comment = other._comment;
+    _mux_signal = nullptr;
+    for (const auto& sig : _signals)
+    {
+        switch (sig.second.getMultiplexerIndicator())
+        {
+        case Signal::Multiplexer::MuxSwitch:
+            _mux_signal = &sig.second;
+            break;
+        }
+    }
+    _error = other._error;
+    return *this;
 }
 std::unique_ptr<Message> MessageImpl::clone() const
 {
@@ -129,7 +192,6 @@ void MessageImpl::forEachSignalOrderedByStartBit(std::function<void(const Signal
         cb(s.second);
     }
 }
-
 const Attribute* MessageImpl::getAttributeValueByName(const std::string& name) const
 {
     const Attribute* result = nullptr;
@@ -164,18 +226,16 @@ const std::string& MessageImpl::getComment() const
 {
     return _comment;
 }
+const Signal* MessageImpl::getMuxSignal() const 
+{
+    return _mux_signal;
+}
+MessageImpl::ErrorCode MessageImpl::getError() const
+{
+    return _error;
+}
+
 const std::map<std::string, SignalImpl>& MessageImpl::signals() const
 {
     return _signals;
-}
-
-void Message::serializeToStream(std::ostream& os) const
-{
-    os << "BO_ " << getId() << " " << getName() << ": " << getMessageSize() << " " << getTransmitter();
-    forEachSignal(
-            [&](const Signal& s)
-            {
-                os << "\n ";
-                s.serializeToStream(os);
-            });
 }

@@ -1,4 +1,3 @@
-
 #include "NodeImpl.h"
 
 using namespace dbcppp;
@@ -62,9 +61,4 @@ void NodeImpl::forEachAttributeValue(std::function<void(const Attribute&)>&& cb)
     {
         cb(av.second);
     }
-}
-
-void Node::serializeToStream(std::ostream& os) const
-{
-    os << getName();
 }

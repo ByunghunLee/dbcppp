@@ -1,4 +1,3 @@
-
 #include "../../include/dbcppp/Network.h"
 #include "ValueTableImpl.h"
 
@@ -47,24 +46,5 @@ void ValueTableImpl::forEachValueEncodingDescription(std::function<void(double, 
     for (const auto& ved : _value_encoding_descriptions)
     {
         cb(ved.first, ved.second);
-    }
-}
-
-void ValueTable::serializeToStream(std::ostream& os) const
-{
-    bool first = true;
-    forEachValueEncodingDescription(
-        [&](double value, const std::string& desc)
-        {
-            if (first)
-            {
-                first = false;
-                os << "VAL_TABLE_ " << getName();
-            }
-            os << " " << value << " \"" << desc << "\"";
-        });
-    if (!first)
-    {
-        os << ";";
     }
 }
