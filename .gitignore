@@ -14,3 +14,6 @@ CTestTestfile.cmake
 /cmake-build-release/
 /src/Test/Config.h
 /CMakeSettings.json
+cmake-build-*
+.idea
+/output
