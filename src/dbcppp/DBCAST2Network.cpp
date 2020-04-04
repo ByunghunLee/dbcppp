@@ -594,7 +594,7 @@ std::unique_ptr<Network> Network::fromDBC(std::istream& is, std::unique_ptr<Netw
 }
 extern "C"
 {
-    DBCPPP_API const dbcppp_Network* dbcppp_NetworkLoadDBCFromFile(const char* filename)
+    DBCPPP_API dbcppp_Network* dbcppp_NetworkLoadDBCFromFile(const char* filename)
     {
         std::unique_ptr<Network> result;
         std::ifstream is(filename);
@@ -619,6 +619,15 @@ extern "C"
         {
             std::cout << "Error! Couldn't find \"" << filename << "\"" << std::endl;
         }
-        return reinterpret_cast<const dbcppp_Network*>(result.release());
+        return reinterpret_cast<dbcppp_Network*>(result.release());
+    }
+
+    DBCPPP_API dbcppp_Network* dbcppp_NetworkLoadAnotherDBC(const char* filename, dbcppp_Network* network)
+    {
+        std::unique_ptr<Network> net = std::unique_ptr<Network>(reinterpret_cast<NetworkImpl*>(network));
+        std::ifstream dbc(filename);
+        auto result = dbcppp::Network::fromDBC(dbc, std::move(net));
+        std::cout << result->getMessageById(154)->getSignalByName("OBJ_Sync_ID")->getName() << std::endl;
+        return reinterpret_cast<dbcppp_Network*>(result.release());
     }
 }
