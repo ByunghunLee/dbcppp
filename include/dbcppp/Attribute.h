@@ -9,6 +9,8 @@
 
 namespace dbcppp
 {
+
+
     class Network;
     class DBCPPP_API Attribute
     {

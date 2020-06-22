@@ -5,8 +5,9 @@ A C/C++ DBC file parser based on `boost.spirit`. This library is designed for de
 * very fast decoding
 * verbose parser output in error case
 * DBC is editable through C/C++ interface exported from the library
-* read DBC file
+* read/write DBC file
 * decode functionality for frames of arbitrarily byte length
+* cantools like decoding
 ## DBC data types
 ### Supported
 * version
@@ -29,18 +30,36 @@ A C/C++ DBC file parser based on `boost.spirit`. This library is designed for de
 * sigtype_attr_list
 * signal_type_refs
 * signal_groups
-# Build and install
+# Getting started
+## Dependencies
+* boost
+## Build & Install
 ```
+git clone https://github.com/xR3b0rn/dbcppp.git
+cd dbcppp
 mkdir build
 cd build
 cmake ..
-make -j6
+make -j
 make RunTests
 make install
 ```
-## Dependencies
-* boost
 # Usage example
+## Command line tool
+### dbc2
+```
+# generate C source from DBC
+dbcppp dbc2 --dbc=file.dbc --format=C --out=file.h
+# beauty or merge DBC
+dbcppp dbc2 --dbc=file1.dbc --dbc=file2.dbc --format=DBC --out=merged.dbc
+```
+This feature isn't well tested. Especially the C generator does have a high chance of generating erroneous code.
+### decode
+[cantools](https://github.com/eerimoq/cantools) like decoding:
+```
+candump any | dbcppp decode --bus=vcan0,file1.dbc --bus=vcan1,file2.dbc
+```
+## Library
 * [Examples](https://github.com/xR3b0rn/dbcppp/tree/master/src/Examples)
 * `C++`
 ```C++
@@ -63,7 +82,7 @@ int main()
                 msg->forEachSignal(
                     [&](const Signal& signal)
                     {
-                        double raw = signal.decode(frame.data);
+                        uint64_t raw = signal.decode(frame.data);
                         std::cout << "\t" << signal.getName() << "=" << signal.rawToPhys(raw) << std::endl;
                     });
             }
@@ -91,7 +110,7 @@ int main()
                 void print_signal_data(const dbcppp_Signal* sig, void* data)
                 {
                     can_frame* frame = (can_frame*)data;
-                    double raw = dbcppp_SignalDecode(sig, frame->data);
+                    uint64_t raw = dbcppp_SignalDecode(sig, frame->data);
                     double phys = dbcppp_SignalRawToPhys(sig, raw);
                     printf("\t%s=%f\n", dbcppp_SignalGetName(sig), phys);
                 }

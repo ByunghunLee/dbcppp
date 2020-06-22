@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <functional>
 
 #include "Export.h"
 #include "Attribute.h"

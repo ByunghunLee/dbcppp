@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <functional>
 #include <boost/variant.hpp>
 #include <functional>
 #include "Export.h"

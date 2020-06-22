@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <robin-map/tsl/robin_map.h>
 #include "../../include/dbcppp/Network.h"
 #include "BitTimingImpl.h"
 #include "ValueTableImpl.h"
@@ -23,7 +22,7 @@ namespace dbcppp
             , BitTimingImpl&& bit_timing
             , std::map<std::string, NodeImpl>&& nodes
             , std::map<std::string, ValueTableImpl>&& value_tables
-            , tsl::robin_map<uint64_t, MessageImpl>&& messages
+            , std::map<uint64_t, MessageImpl>&& messages
             , std::map<std::string, EnvironmentVariableImpl>&& environment_variables
             , std::map<std::string, AttributeDefinitionImpl>&& attribute_definitions
             , std::map<std::string, AttributeImpl>&& attribute_defaults
@@ -66,7 +65,7 @@ namespace dbcppp
         BitTimingImpl& bitTiming();
         std::map<std::string, NodeImpl>& nodes();
         std::map<std::string, ValueTableImpl>& valueTables();
-        tsl::robin_map<uint64_t, MessageImpl>& messages();
+		std::map<uint64_t, MessageImpl>& messages();
         std::map<std::string, EnvironmentVariableImpl>& environmentVariables();
         std::map<std::string, AttributeDefinitionImpl>& attributeDefinitions();
         std::map<std::string, AttributeImpl>& attributeDefaults();
@@ -79,7 +78,7 @@ namespace dbcppp
         BitTimingImpl _bit_timing;
         std::map<std::string, NodeImpl> _nodes;
         std::map<std::string, ValueTableImpl> _value_tables;
-        tsl::robin_map<uint64_t, MessageImpl> _messages;
+		std::map<uint64_t, MessageImpl> _messages;
         std::map<std::string, EnvironmentVariableImpl> _environment_variables;
         std::map<std::string, AttributeDefinitionImpl> _attribute_definitions;
         std::map<std::string, AttributeImpl> _attribute_defaults;
