@@ -11,12 +11,12 @@ file(GLOB src
     "*.cpp"
 )
 
-add_executable(${PROJECT_NAME} ${header} ${src})
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 17)
-add_dependencies(${PROJECT_NAME} ${PROJECT_NAME})
-#target_link_libraries(${PROJECT_NAME}  ${Boost_LIBRARIES})
+add_executable(dbcppp ${header} ${src})
+set_property(TARGET dbcppp PROPERTY CXX_STANDARD 17)
+add_dependencies(dbcppp ${PROJECT_NAME})
+#target_link_libraries(dbcppp  ${Boost_LIBRARIES})
 
 install(
-    TARGETS ${PROJECT_NAME}
+    TARGETS dbcppp
     DESTINATION ${CMAKE_INSTALL_BINDIR})
 

@@ -2,3 +2,5 @@
 #define Core_Lanes_Host_protocol "@CMAKE_CURRENT_SOURCE_DIR@/Core_Lanes_Host_protocol.dbc"
 #define Core_Objects_protocol "@CMAKE_CURRENT_SOURCE_DIR@/Core_Objects_protocol.dbc"
 #define TEST_DBC "@CMAKE_CURRENT_SOURCE_DIR@/Test.dbc"
+#define Core_Application_Message_EQ5_protocol "@CMAKE_CURRENT_SOURCE_DIR@/Core_Application_Message_EQ5_protocol.dbc"
+#define Core_DV_Init "@CMAKE_CURRENT_SOURCE_DIR@/Core_DV_Init.dbc"

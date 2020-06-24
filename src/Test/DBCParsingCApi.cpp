@@ -15,7 +15,7 @@
 
 #include <boost/test/unit_test.hpp>
 namespace utf = boost::unit_test;
-
+/*
 BOOST_AUTO_TEST_CASE(DBCParsingCApi)
 {
     BOOST_TEST_MESSAGE("Testing dbcppp C API for correctness...");
@@ -41,3 +41,4 @@ BOOST_AUTO_TEST_CASE(DBCParsingCApi)
     BOOST_REQUIRE_EQUAL(spec->getComment(), dbcppp_NetworkGetComment(impl));
     dbcppp_NetworkFree(impl);
 }
+*/

@@ -519,8 +519,7 @@ namespace dbcppp
         }
         return {line, column};
     }
-
-
+	
     template <class Iter>
     class NetworkGrammar
         : public boost::spirit::qi::grammar<Iter, G_Network(), boost::spirit::ascii::space_type>
@@ -640,7 +639,7 @@ namespace dbcppp
             _value_description_env_var.name("ValueDescriptionsEnvVar");
             _signal_extended_value_types.name("SignalExtendedValueTypes");
             _signal_extended_value_type.name("SignalExtendedValueType");
-
+			_single_line_comment.name("SingleLineComment");
 
             using boost::spirit::repository::qi::iter_pos;
 
@@ -827,7 +826,9 @@ namespace dbcppp
             _signal_extended_value_types %= *_signal_extended_value_type;
             _signal_extended_value_type %= iter_pos >> qi::lexeme[qi::lit("SIG_VALTYPE_") >> qi::omit[qi::space]]
                 > _message_id > _signal_name > ':' >  _unsigned_integer > ';';
-        
+
+			_single_line_comment %= qi::lit("//") >> _char_string;
+        	
             auto error_handler =
                 [begin](const auto& args, const auto& context, const auto& error)
                 {
@@ -958,5 +959,6 @@ namespace dbcppp
 
         boost::spirit::qi::rule<Iter, std::vector<G_SignalExtendedValueType>(), Skipper> _signal_extended_value_types;
         boost::spirit::qi::rule<Iter, G_SignalExtendedValueType(), Skipper> _signal_extended_value_type;
+		boost::spirit::qi::rule<Iter, std::string(), Skipper> _single_line_comment;
     };
 }

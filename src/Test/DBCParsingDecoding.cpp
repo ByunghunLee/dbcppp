@@ -70,6 +70,74 @@ double _easy_decode(dbcppp::Signal &sig, std::vector<uint8_t> &data) {
     return double(retVal.ui);
 }
 
+
+BOOST_AUTO_TEST_CASE(DBCParsingAndDecoding)
+{
+    using namespace dbcppp;
+    BOOST_TEST_MESSAGE("DBCParsingAndDecoding");
+    std::vector<uint8_t> data
+    {
+            0, 0, 0, 0, 99, 155, 245, 149,
+            8, 118, 32, 0, 0, 0, 0, 128,
+            0, 0, 0, 0, 227, 174, 36, 62,
+            41, 100, 1, 0, 50, 0, 16, 14,
+            0, 0, 0, 0, 98, 144, 1, 1,
+            144, 229, 152, 37, 2, 185, 13, 9,
+            123, 211, 1, 1, 195, 43, 192, 101,
+            1, 58, 11, 16, 203, 18, 12, 25,
+            23, 128, 172, 64, 86, 105, 9, 4,
+            209, 43, 64, 0, 136, 85, 79, 16,
+            136, 120, 0, 1, 57, 214, 1, 1,
+            71, 21, 80, 2, 173, 40, 83, 24,
+            66, 32, 51, 24, 67, 32, 35, 24,
+            0, 96, 134, 16, 66, 224, 184, 15,
+            70, 96, 1, 0
+    };
+
+    std::ifstream object(Core_Objects_protocol);
+    auto net = dbcppp::Network::fromDBC(object);
+
+    BOOST_TEST_MESSAGE("OBJ_Triggered_SDM_0");
+    auto* message = net->getMessageById(154);
+    auto* OBJ_Triggered_SDM_0 = message->getSignalByName("OBJ_Triggered_SDM_0");
+
+    double dec_easy_object_triggered_sdm = _easy_decode(*const_cast<Signal*>(OBJ_Triggered_SDM_0), data);
+    double dec_sig_object_triggered_sdm = OBJ_Triggered_SDM_0->decode(&data[0]);
+
+    BOOST_TEST(dec_easy_object_triggered_sdm == dec_sig_object_triggered_sdm);
+    BOOST_TEST(OBJ_Triggered_SDM_0->rawToPhys(dec_sig_object_triggered_sdm) == 2);
+
+	auto&& y = OBJ_Triggered_SDM_0->getValueDescriptionByValue(2);
+
+	if(y != nullptr)
+    {
+        std::cout << *y << std::endl;
+    }
+    else
+    {
+        std::cout << "nil" << std::endl;
+    }
+
+    BOOST_TEST_MESSAGE("OBJ_Height_0");
+    auto* OBJ_Height_0 = message->getSignalByName("OBJ_Height_0");
+
+    double dec_easy_object_height_0 = _easy_decode(*const_cast<Signal*>(OBJ_Height_0), data);
+    double dec_sig_object_height_0 = OBJ_Height_0->decode(&data[0]);
+
+    BOOST_TEST(dec_easy_object_height_0 == dec_sig_object_height_0);
+    BOOST_TEST(OBJ_Height_0->rawToPhys(dec_sig_object_height_0) == 2.2);
+    auto&& x =  OBJ_Height_0->getValueDescriptionByValue(1);
+    if(x != nullptr)
+    {
+        std::cout << *x << std::endl;
+    }
+    else
+    {
+        std::cout << "nil" << std::endl;
+    }
+}
+
+
 //BOOST_AUTO_TEST_CASE(Test_decoding) {
 //    using namespace dbcppp;
 //
@@ -207,75 +275,3 @@ double _easy_decode(dbcppp::Signal &sig, std::vector<uint8_t> &data) {
 //
 //    BOOST_TEST_MESSAGE("Done!");
 //}
-
-BOOST_AUTO_TEST_CASE(DBCParsingAndDecoding)
-{
-    using namespace dbcppp;
-    BOOST_TEST_MESSAGE("DBCParsingAndDecoding");
-    std::vector<uint8_t> data
-    {
-            0, 0, 0, 0, 99, 155, 245, 149,
-            8, 118, 32, 0, 0, 0, 0, 128,
-            0, 0, 0, 0, 227, 174, 36, 62,
-            41, 100, 1, 0, 50, 0, 16, 14,
-            0, 0, 0, 0, 98, 144, 1, 1,
-            144, 229, 152, 37, 2, 185, 13, 9,
-            123, 211, 1, 1, 195, 43, 192, 101,
-            1, 58, 11, 16, 203, 18, 12, 25,
-            23, 128, 172, 64, 86, 105, 9, 4,
-            209, 43, 64, 0, 136, 85, 79, 16,
-            136, 120, 0, 1, 57, 214, 1, 1,
-            71, 21, 80, 2, 173, 40, 83, 24,
-            66, 32, 51, 24, 67, 32, 35, 24,
-            0, 96, 134, 16, 66, 224, 184, 15,
-            70, 96, 1, 0
-    };
-
-    std::ifstream object(Core_Objects_protocol);
-    auto net = dbcppp::Network::fromDBC(object);
-
-    //    std::unique_ptr<Signal> OBJ_Triggered_SDM_0 = Signal::create(1940, "OBJ_Triggered_SDM_0",
-//                                                                 Signal::Multiplexer::NoMux, 0, 224, 2,
-//                                                                 Signal::ByteOrder::LittleEndian,
-//                                                                 Signal::ValueType::Unsigned, 1.0, 0.0, 0.0, 2.0,
-//                                                                 "Enum", {}, {}, {}, "",
-//                                                                 Signal::ExtendedValueType::Integer);
-
-    BOOST_TEST_MESSAGE("OBJ_Triggered_SDM_0");
-    auto* message = net->getMessageById(154);
-    auto* OBJ_Triggered_SDM_0 = message->getSignalByName("OBJ_Triggered_SDM_0");
-
-    double dec_easy_object_triggered_sdm = _easy_decode(*const_cast<Signal*>(OBJ_Triggered_SDM_0), data);
-    double dec_sig_object_triggered_sdm = OBJ_Triggered_SDM_0->decode(&data[0]);
-
-    BOOST_TEST(dec_easy_object_triggered_sdm == dec_sig_object_triggered_sdm);
-    BOOST_TEST(OBJ_Triggered_SDM_0->rawToPhys(dec_sig_object_triggered_sdm) == 2);
-    auto&& y = OBJ_Triggered_SDM_0->getValueDescriptionByValue(2);
-    if(y != nullptr)
-    {
-        std::cout << *y << std::endl;
-    }
-    else
-    {
-        std::cout << "nil" << std::endl;
-    }
-
-    BOOST_TEST_MESSAGE("OBJ_Height_0");
-    auto* OBJ_Height_0 = message->getSignalByName("OBJ_Height_0");
-
-    double dec_easy_object_height_0 = _easy_decode(*const_cast<Signal*>(OBJ_Height_0), data);
-    double dec_sig_object_height_0 = OBJ_Height_0->decode(&data[0]);
-
-    BOOST_TEST(dec_easy_object_height_0 == dec_sig_object_height_0);
-    BOOST_TEST(OBJ_Height_0->rawToPhys(dec_sig_object_height_0) == 2.2);
-    auto&& x =  OBJ_Height_0->getValueDescriptionByValue(1);
-    if(x != nullptr)
-    {
-        std::cout << *x << std::endl;
-    }
-    else
-    {
-        std::cout << "nil" << std::endl;
-    }
-
-}
