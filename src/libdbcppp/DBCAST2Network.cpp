@@ -1,5 +1,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/regex.hpp>
+
 #include <iterator>
 #include "../../include/dbcppp/Network.h"
 #include "DBC_Grammar.h"
@@ -572,27 +574,17 @@ std::unique_ptr<Network> DBCAST2Network(const G_Network& gnet)
 
 std::unique_ptr<Network> Network::fromDBC(std::istream& is)
 {
-	using Iterator = boost::spirit::istream_iterator;
-	using Skipper = qi::rule<Iterator>;
-	
-	Skipper block_comment, single_line_comment, skipper;
-
-	{
-		using namespace qi;
-		single_line_comment = "//" >> *(char_ - eol) >> (eol | eoi);
-		block_comment = ("/*" >> *(block_comment | char_ - "*/")) > "*/";
-
-		skipper = boost::spirit::ascii::space | single_line_comment | block_comment;
-	}
-	
 	std::unique_ptr<Network> result;
     std::string str((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
-    auto begin{str.begin()}, end{str.end()};
+	const boost::regex e{ "^//[ 0-9a-zA-Z=-]+$", boost::regex_constants::perl };
+	str = boost::regex_replace(str, e, "");
+	
+	auto begin{str.begin()}, end{str.end()};
+	
     NetworkGrammar<std::string::iterator> g(begin);
     G_Network gnet;
-    //bool succeeded = phrase_parse(begin, end, g, boost::spirit::ascii::space, gnet);
-	bool succeeded = phrase_parse(begin, end, g, skipper, gnet);
-    if (succeeded && (begin == end))
+    bool succeeded = phrase_parse(begin, end, g, boost::spirit::ascii::space, gnet);
+	if (succeeded && (begin == end))
     {
         result = DBCAST2Network(gnet);
     }
@@ -615,9 +607,11 @@ extern "C"
 	{
 		std::unique_ptr<Network> result;
 		std::ifstream is(filename);
+		const boost::regex e{ "^//[ 0-9a-zA-Z=-]+$", boost::regex_constants::perl };
 		if (is.is_open())
 		{
 			std::string str((std::istreambuf_iterator<char>(is)), std::istreambuf_iterator<char>());
+			str = boost::regex_replace(str, e, "");
 			auto begin{ str.begin() }, end{ str.end() };
 			NetworkGrammar<std::string::iterator> g(begin);
 			G_Network gnet;

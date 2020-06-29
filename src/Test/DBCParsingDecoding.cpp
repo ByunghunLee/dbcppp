@@ -223,55 +223,55 @@ BOOST_AUTO_TEST_CASE(DBCParsingAndDecoding)
 //    }
 //}
 
-//BOOST_AUTO_TEST_CASE(DBCParsing) {
-//
-//    BOOST_TEST_MESSAGE("Testing DBC AST tree for correctness...");
-//
-//    std::ifstream lane_host(Core_Lanes_Host_protocol);
-//    std::ifstream object(Core_Objects_protocol);
-//
-//    auto net = dbcppp::Network::fromDBC(lane_host);
-//    net = dbcppp::Network::fromDBC(object, std::move(net));
-//
-//    net->forEachMessage
-//    (
-//        [&](const dbcppp::Message &m)
-//        {
-//            std::cout << m.getName() << std::endl;
-//            std::cout << "for Each Signal by Start Bit" << std::endl;
-//            m.forEachSignalOrderedByStartBit
-//            (
-//                [&](const dbcppp::Signal &s)
-//                {
-//                    s.forEachValueDescription
-//                    (
-//                    [&](double value, const std::string& desc)
-//                        {
-//                            std::cout << " value: " << value << ", desc: " << desc << std::endl;
-//                        });
-//                    std::cout << " Name: " << s.getName() << ", Start bit: " << s.getStartBit()
-//                              << ", Max: "
-//                              << s.getMaximum() << ", Bitsize: " << s.getBitSize()
-//                              << ", Comment: "
-//                              << s.getComment()
-//                              << std::endl;
-//                }
-//            );
-//
-//            std::cout << "for Each Signal" << std::endl;
-//            m.forEachSignal
-//            (
-//                    [&](const dbcppp::Signal &s)
-//                    {
-//                        std::cout << " Name: " << s.getName() << ", Start bit: " << s.getStartBit()
-//                                  << ", Max: "
-//                                  << s.getMaximum() << ", Bitsize: " << s.getBitSize()
-//                                  << ", Comment: "
-//                                  << s.getComment() << std::endl;
-//                    }
-//            );
-//        }
-//    );
-//
-//    BOOST_TEST_MESSAGE("Done!");
-//}
+BOOST_AUTO_TEST_CASE(DBCParsing) {
+
+    BOOST_TEST_MESSAGE("Testing DBC AST tree for correctness...");
+
+    std::ifstream core_DV_Init(Core_DV_Init);
+    std::ifstream core_application(Core_Application_Message_EQ5_protocol);
+
+    auto net = dbcppp::Network::fromDBC(core_DV_Init);
+    net = dbcppp::Network::fromDBC(core_application, std::move(net));
+
+    net->forEachMessage
+    (
+        [&](const dbcppp::Message &m)
+        {
+            std::cout << m.getName() << std::endl;
+            std::cout << "for Each Signal by Start Bit" << std::endl;
+            m.forEachSignalOrderedByStartBit
+            (
+                [&](const dbcppp::Signal &s)
+                {
+                    s.forEachValueDescription
+                    (
+                    [&](double value, const std::string& desc)
+                        {
+                            std::cout << " value: " << value << ", desc: " << desc << std::endl;
+                        });
+                    std::cout << " Name: " << s.getName() << ", Start bit: " << s.getStartBit()
+                              << ", Max: "
+                              << s.getMaximum() << ", Bitsize: " << s.getBitSize()
+                              << ", Comment: "
+                              << s.getComment()
+                              << std::endl;
+                }
+            );
+
+            std::cout << "for Each Signal" << std::endl;
+            m.forEachSignal
+            (
+                    [&](const dbcppp::Signal &s)
+                    {
+                        std::cout << " Name: " << s.getName() << ", Start bit: " << s.getStartBit()
+                                  << ", Max: "
+                                  << s.getMaximum() << ", Bitsize: " << s.getBitSize()
+                                  << ", Comment: "
+                                  << s.getComment() << std::endl;
+                    }
+            );
+        }
+    );
+
+    BOOST_TEST_MESSAGE("Done!");
+}

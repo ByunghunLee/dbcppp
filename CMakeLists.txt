@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 3.16)
 
 project("libdbcppp"  VERSION 1.0 LANGUAGES CXX)
 
+SET(MY_OWN_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/output CACHE PATH "Prefix prepended to install directories")
+SET(CMAKE_INSTALL_PREFIX "${MY_OWN_INSTALL_PREFIX}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
+
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
